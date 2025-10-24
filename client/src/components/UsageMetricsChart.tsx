@@ -1,21 +1,22 @@
 import { Card } from "@/components/ui/card";
 import { useEffect, useRef } from "react";
 import { Chart, registerables } from "chart.js";
+import { useQuery } from "@tanstack/react-query";
+import type { UsageMetric } from "@shared/schema";
 
 Chart.register(...registerables);
-
-const mockUsageData = {
-  labels: ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6", "Week 7", "Week 8"],
-  dau: [1200, 1450, 1680, 1820, 2100, 2350, 2580, 2820],
-  satisfaction: [7.2, 7.4, 7.6, 7.8, 8.0, 8.2, 8.3, 8.5],
-};
 
 export default function UsageMetricsChart() {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
 
+  // Fetch data from API
+  const { data: usageData, isLoading } = useQuery<UsageMetric[]>({
+    queryKey: ["/api/usage-metrics"],
+  });
+
   useEffect(() => {
-    if (!chartRef.current) return;
+    if (!chartRef.current || !usageData || usageData.length === 0) return;
 
     const ctx = chartRef.current.getContext("2d");
     if (!ctx) return;
@@ -24,14 +25,18 @@ export default function UsageMetricsChart() {
       chartInstance.current.destroy();
     }
 
+    const labels = usageData.map((m) => m.week);
+    const dauData = usageData.map((m) => m.dailyActiveUsers);
+    const satisfactionData = usageData.map((m) => parseFloat(m.satisfactionScore));
+
     chartInstance.current = new Chart(ctx, {
       type: "line",
       data: {
-        labels: mockUsageData.labels,
+        labels,
         datasets: [
           {
             label: "Daily Active Users",
-            data: mockUsageData.dau,
+            data: dauData,
             borderColor: "hsl(221, 83%, 53%)",
             backgroundColor: "hsla(221, 83%, 53%, 0.1)",
             yAxisID: "y",
@@ -39,7 +44,7 @@ export default function UsageMetricsChart() {
           },
           {
             label: "Satisfaction Score",
-            data: mockUsageData.satisfaction,
+            data: satisfactionData,
             borderColor: "hsl(262, 83%, 58%)",
             backgroundColor: "hsla(262, 83%, 58%, 0.1)",
             yAxisID: "y1",
@@ -116,7 +121,7 @@ export default function UsageMetricsChart() {
         chartInstance.current.destroy();
       }
     };
-  }, []);
+  }, [usageData]);
 
   return (
     <Card className="p-6" data-testid="chart-usage-metrics">
@@ -124,7 +129,13 @@ export default function UsageMetricsChart() {
         <h3 className="text-lg font-semibold">Usage & Satisfaction Trends</h3>
       </div>
       <div className="h-80">
-        <canvas ref={chartRef} />
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-sm text-muted-foreground">Loading chart data...</div>
+          </div>
+        ) : (
+          <canvas ref={chartRef} />
+        )}
       </div>
     </Card>
   );

@@ -1,22 +1,22 @@
 import { Card } from "@/components/ui/card";
 import { useEffect, useRef } from "react";
 import { Chart, registerables } from "chart.js";
+import { useQuery } from "@tanstack/react-query";
+import type { RegionalSentiment } from "@shared/schema";
 
 Chart.register(...registerables);
-
-// TODO: API Integration Point - Replace with Twitter/Instagram/Facebook API data
-// This component will need to fetch regional sentiment data from social media APIs
-const mockRegionalData = {
-  labels: ["Northeast", "Southeast", "Midwest", "Southwest", "West"],
-  data: [8.2, 7.5, 7.9, 6.8, 8.5],
-};
 
 export default function RegionalSentimentChart() {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
 
+  // Fetch data from API
+  const { data: regionalData, isLoading } = useQuery<RegionalSentiment[]>({
+    queryKey: ["/api/regional-sentiment"],
+  });
+
   useEffect(() => {
-    if (!chartRef.current) return;
+    if (!chartRef.current || !regionalData || regionalData.length === 0) return;
 
     const ctx = chartRef.current.getContext("2d");
     if (!ctx) return;
@@ -25,14 +25,17 @@ export default function RegionalSentimentChart() {
       chartInstance.current.destroy();
     }
 
+    const labels = regionalData.map((r) => r.region);
+    const data = regionalData.map((r) => parseFloat(r.sentimentScore));
+
     chartInstance.current = new Chart(ctx, {
       type: "bar",
       data: {
-        labels: mockRegionalData.labels,
+        labels,
         datasets: [
           {
             label: "Average Sentiment Score",
-            data: mockRegionalData.data,
+            data,
             backgroundColor: "hsl(221, 83%, 53%)",
             borderRadius: 6,
           },
@@ -82,7 +85,7 @@ export default function RegionalSentimentChart() {
         chartInstance.current.destroy();
       }
     };
-  }, []);
+  }, [regionalData]);
 
   return (
     <Card className="p-6" data-testid="chart-regional-sentiment">
@@ -91,7 +94,13 @@ export default function RegionalSentimentChart() {
         <span className="text-xs text-muted-foreground">Last 30 days</span>
       </div>
       <div className="h-80">
-        <canvas ref={chartRef} />
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-sm text-muted-foreground">Loading chart data...</div>
+          </div>
+        ) : (
+          <canvas ref={chartRef} />
+        )}
       </div>
     </Card>
   );

@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { BarChart3, Target, TrendingUp } from "lucide-react";
+import { BarChart3, Target, TrendingUp, Settings } from "lucide-react";
 
 export default function Navigation() {
   const [location] = useLocation();
@@ -8,6 +8,7 @@ export default function Navigation() {
     { path: "/", label: "Dashboard", icon: BarChart3 },
     { path: "/prioritization", label: "Prioritization", icon: Target },
     { path: "/impact", label: "Impact Tracker", icon: TrendingUp },
+    { path: "/manage", label: "Manage", icon: Settings },
   ];
 
   return (

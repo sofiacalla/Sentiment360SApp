@@ -1,22 +1,22 @@
 import { Card } from "@/components/ui/card";
 import { useEffect, useRef } from "react";
 import { Chart, registerables } from "chart.js";
+import { useQuery } from "@tanstack/react-query";
+import type { SentimentTrend } from "@shared/schema";
 
 Chart.register(...registerables);
-
-// TODO: API Integration Point - Replace with Twitter/Instagram/Facebook API data
-// This component will aggregate sentiment trends over time from social media platforms
-const mockTrendData = {
-  labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"],
-  data: [7.2, 7.4, 7.1, 7.6, 7.8, 7.9, 8.0, 7.7, 8.2, 8.3],
-};
 
 export default function SentimentTrendChart() {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
 
+  // Fetch data from API
+  const { data: trendsData, isLoading } = useQuery<SentimentTrend[]>({
+    queryKey: ["/api/sentiment-trends"],
+  });
+
   useEffect(() => {
-    if (!chartRef.current) return;
+    if (!chartRef.current || !trendsData || trendsData.length === 0) return;
 
     const ctx = chartRef.current.getContext("2d");
     if (!ctx) return;
@@ -25,14 +25,17 @@ export default function SentimentTrendChart() {
       chartInstance.current.destroy();
     }
 
+    const labels = trendsData.map((t) => t.month);
+    const data = trendsData.map((t) => parseFloat(t.score));
+
     chartInstance.current = new Chart(ctx, {
       type: "line",
       data: {
-        labels: mockTrendData.labels,
+        labels,
         datasets: [
           {
             label: "Sentiment Score",
-            data: mockTrendData.data,
+            data,
             borderColor: "hsl(221, 83%, 53%)",
             backgroundColor: "hsla(221, 83%, 53%, 0.1)",
             fill: true,
@@ -86,7 +89,7 @@ export default function SentimentTrendChart() {
         chartInstance.current.destroy();
       }
     };
-  }, []);
+  }, [trendsData]);
 
   return (
     <Card className="p-6" data-testid="chart-sentiment-trend">
@@ -105,7 +108,13 @@ export default function SentimentTrendChart() {
         </div>
       </div>
       <div className="h-80">
-        <canvas ref={chartRef} />
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-sm text-muted-foreground">Loading chart data...</div>
+          </div>
+        ) : (
+          <canvas ref={chartRef} />
+        )}
       </div>
     </Card>
   );

@@ -1,8 +1,15 @@
 import ImpactComparison from "@/components/ImpactComparison";
 import UsageMetricsChart from "@/components/UsageMetricsChart";
 import ChannelsIntegrated from "@/components/ChannelsIntegrated";
+import { useQuery } from "@tanstack/react-query";
+import type { ImpactMetric } from "@shared/schema";
 
 export default function ImpactTracker() {
+  // Fetch data from API
+  const { data: metricsData, isLoading } = useQuery<ImpactMetric[]>({
+    queryKey: ["/api/impact-metrics"],
+  });
+
   return (
     <div className="pt-20 px-4 md:px-6 lg:px-8 pb-8">
       <div className="max-w-7xl mx-auto">
@@ -13,31 +20,27 @@ export default function ImpactTracker() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <ImpactComparison
-            title="Time to Resolution"
-            beforeValue="4.2"
-            afterValue="1.5"
-            improvement={64}
-            unit="hours"
-            testId="comparison-resolution-time"
-          />
-          <ImpactComparison
-            title="Customer Satisfaction"
-            beforeValue="7.2"
-            afterValue="8.5"
-            improvement={18}
-            unit="/10"
-            testId="comparison-satisfaction"
-          />
-          <ImpactComparison
-            title="Retention Rate"
-            beforeValue="78%"
-            afterValue="91%"
-            improvement={17}
-            testId="comparison-retention"
-          />
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-40 rounded-lg bg-card border animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            {metricsData?.map((metric) => (
+              <ImpactComparison
+                key={metric.id}
+                title={metric.metricName}
+                beforeValue={metric.beforeValue}
+                afterValue={metric.afterValue}
+                improvement={metric.improvement}
+                unit={metric.unit || ""}
+                testId={`comparison-${metric.metricName.toLowerCase().replace(/\s+/g, "-")}`}
+              />
+            ))}
+          </div>
+        )}
 
         <div className="mb-6">
           <UsageMetricsChart />

@@ -7,6 +7,7 @@ import Navigation from "@/components/Navigation";
 import Dashboard from "@/pages/Dashboard";
 import Prioritization from "@/pages/Prioritization";
 import ImpactTracker from "@/pages/ImpactTracker";
+import Manage from "@/pages/Manage";
 
 function Router() {
   return (
@@ -14,6 +15,7 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/prioritization" component={Prioritization} />
       <Route path="/impact" component={ImpactTracker} />
+      <Route path="/manage" component={Manage} />
     </Switch>
   );
 }
