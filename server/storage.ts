@@ -18,6 +18,7 @@ import {
   type ImpactMetric,
   type UsageMetric,
   type Channel,
+  type InsertChannel,
 } from "@shared/schema";
 import { db } from "./db";
 import { desc } from "drizzle-orm";
@@ -49,6 +50,7 @@ export interface IStorage {
   
   // Channels
   getChannels(): Promise<Channel[]>;
+  createChannel(channel: InsertChannel): Promise<Channel>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -113,6 +115,14 @@ export class DatabaseStorage implements IStorage {
   
   async getChannels(): Promise<Channel[]> {
     return await db.select().from(channels);
+  }
+  
+  async createChannel(insertChannel: InsertChannel): Promise<Channel> {
+    const [newChannel] = await db
+      .insert(channels)
+      .values(insertChannel)
+      .returning();
+    return newChannel;
   }
 }
 

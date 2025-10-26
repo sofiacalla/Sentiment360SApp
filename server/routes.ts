@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertFeedbackSchema, insertPriorityItemSchema, insertAIInsightSchema } from "@shared/schema";
+import { insertFeedbackSchema, insertPriorityItemSchema, insertAIInsightSchema, insertChannelSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard endpoints
@@ -107,6 +107,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(data);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch channels" });
+    }
+  });
+
+  app.post("/api/channels", async (req, res) => {
+    try {
+      const validatedData = insertChannelSchema.parse(req.body);
+      const newChannel = await storage.createChannel(validatedData);
+      res.status(201).json(newChannel);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid channel data" });
     }
   });
 

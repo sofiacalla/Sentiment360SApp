@@ -30,6 +30,10 @@ export default function Manage() {
   const [priorityCategory, setPriorityCategory] = useState("Product");
   const [priorityRank, setPriorityRank] = useState("1");
 
+  const [channelName, setChannelName] = useState("");
+  const [channelStatus, setChannelStatus] = useState("active");
+  const [channelMessageCount, setChannelMessageCount] = useState("0");
+
   const addFeedbackMutation = useMutation({
     mutationFn: async (data: any) => {
       return await apiRequest("POST", "/api/feedback", data);
@@ -74,6 +78,28 @@ export default function Manage() {
     },
   });
 
+  const addChannelMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("POST", "/api/channels", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/channels"] });
+      toast({
+        title: "Success",
+        description: "Channel added successfully",
+      });
+      setChannelName("");
+      setChannelMessageCount("0");
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to add channel",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleAddFeedback = (e: React.FormEvent) => {
     e.preventDefault();
     addFeedbackMutation.mutate({
@@ -96,13 +122,22 @@ export default function Manage() {
     });
   };
 
+  const handleAddChannel = (e: React.FormEvent) => {
+    e.preventDefault();
+    addChannelMutation.mutate({
+      name: channelName,
+      status: channelStatus,
+      messageCount: channelMessageCount,
+    });
+  };
+
   return (
     <div className="pt-20 px-4 md:px-6 lg:px-8 pb-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl lg:text-4xl font-semibold mb-2">Data Management</h1>
           <p className="text-muted-foreground">
-            Add new feedback and priority items to your analytics dashboard
+            Add new feedback, priority items, and channels to your analytics dashboard
           </p>
         </div>
 
@@ -290,6 +325,64 @@ export default function Manage() {
                 disabled={addPriorityMutation.isPending}
               >
                 {addPriorityMutation.isPending ? "Adding..." : "Add Priority Item"}
+              </Button>
+            </form>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-6">
+              <Plus className="w-5 h-5 text-primary" />
+              <h2 className="text-xl font-semibold">Add New Channel</h2>
+            </div>
+
+            <form onSubmit={handleAddChannel} className="space-y-4">
+              <div>
+                <Label htmlFor="channel-name">Channel Name</Label>
+                <Input
+                  id="channel-name"
+                  data-testid="input-channel-name"
+                  value={channelName}
+                  onChange={(e) => setChannelName(e.target.value)}
+                  placeholder="e.g., Twitter, Instagram, Support Email..."
+                  required
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="channel-status">Status</Label>
+                <Select value={channelStatus} onValueChange={setChannelStatus}>
+                  <SelectTrigger id="channel-status" data-testid="select-channel-status" className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="channel-message-count">Message Count</Label>
+                <Input
+                  id="channel-message-count"
+                  data-testid="input-channel-message-count"
+                  type="text"
+                  value={channelMessageCount}
+                  onChange={(e) => setChannelMessageCount(e.target.value)}
+                  placeholder="e.g., 2.5K, 15K, 100..."
+                  required
+                  className="mt-2"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full"
+                data-testid="button-add-channel"
+                disabled={addChannelMutation.isPending}
+              >
+                {addChannelMutation.isPending ? "Adding..." : "Add Channel"}
               </Button>
             </form>
           </Card>
