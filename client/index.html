@@ -1,17 +1,47 @@
+<!-- HTML5 doctype declaration - tells browser this is an HTML5 document -->
 <!DOCTYPE html>
+<!-- Root HTML element with language attribute set to English -->
 <html lang="en">
+  <!-- Head section - contains metadata and resources that don't display on page -->
   <head>
+    <!-- Character encoding meta tag - tells browser to use UTF-8 encoding for all text -->
     <meta charset="UTF-8" />
+    <!-- Viewport meta tag - controls page scaling on mobile devices -->
+    <!-- width=device-width: makes page width match device screen width -->
+    <!-- initial-scale=1.0: sets initial zoom level to 100% -->
+    <!-- maximum-scale=1: prevents user from zooming in (improves mobile UX consistency) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <!-- Meta description for SEO - appears in search engine results -->
+    <!-- Describes Sentiment360 as AI-powered customer sentiment analytics platform -->
     <meta name="description" content="Sentiment360 - AI-powered customer sentiment analytics platform for tracking, analyzing, and acting on customer feedback across all channels." />
+    <!-- Page title - appears in browser tab and search results -->
     <title>Sentiment360 - Customer Sentiment Analytics Dashboard</title>
+    <!-- Favicon link - small icon that appears in browser tab -->
+    <!-- type="image/png": specifies icon is PNG format -->
+    <!-- href="/favicon.png": path to favicon file in public directory -->
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <!-- Preconnect to Google Fonts API - establishes early connection to improve loading speed -->
+    <!-- rel="preconnect": tells browser to establish connection before fonts are requested -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <!-- Preconnect to Google Fonts static content server with CORS support -->
+    <!-- crossorigin: enables cross-origin resource sharing for font files -->
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Google Fonts stylesheet link - loads Inter and JetBrains Mono fonts -->
+    <!-- Inter font family: used for UI text with weights 400 (regular), 500 (medium), 600 (semibold), 700 (bold) -->
+    <!-- JetBrains Mono font family: used for code/data display with weights 400, 500, 600 -->
+    <!-- display=swap: shows fallback font first, then swaps to custom font when loaded -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  </head>
+  </head> <!-- Close head section -->
+  <!-- Body section - contains all visible page content -->
   <body>
+    <!-- Root div - React application mounts here -->
+    <!-- id="root": JavaScript looks for this ID to inject React app -->
+    <!-- This div starts empty and React fills it with components -->
     <div id="root"></div>
+    <!-- Script tag to load main TypeScript/React entry point -->
+    <!-- type="module": loads as ES6 module (enables import/export) -->
+    <!-- src="/src/main.tsx": path to main React application file -->
+    <!-- Vite processes this during development and build -->
     <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+  </body> <!-- Close body section -->
+</html> <!-- Close root HTML element -->
