@@ -1,3 +1,15 @@
+/**
+ * Manage Page Component
+ * 
+ * This page provides data management interfaces for adding new:
+ * - Customer feedback entries
+ * - Priority items for the impact matrix
+ * - Communication channels
+ * 
+ * All forms use controlled components with real-time validation
+ * and optimistic updates to the dashboard.
+ */
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,37 +29,62 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Plus } from "lucide-react";
 
 export default function Manage() {
+  // Toast notification hook for user feedback
   const { toast } = useToast();
-  const [feedbackText, setFeedbackText] = useState("");
-  const [feedbackSentiment, setFeedbackSentiment] = useState("positive");
-  const [feedbackSource, setFeedbackSource] = useState("Twitter");
-  const [feedbackRegion, setFeedbackRegion] = useState("Northeast");
+  
+  // ============================================================================
+  // Feedback Form State
+  // Controls for the customer feedback submission form
+  // ============================================================================
+  const [feedbackText, setFeedbackText] = useState(""); // Feedback content
+  const [feedbackSentiment, setFeedbackSentiment] = useState("positive"); // positive/negative/neutral
+  const [feedbackSource, setFeedbackSource] = useState("Twitter"); // Channel source
+  const [feedbackRegion, setFeedbackRegion] = useState("Northeast"); // U.S. region
 
-  const [priorityTitle, setPriorityTitle] = useState("");
-  const [priorityDescription, setPriorityDescription] = useState("");
-  const [priorityImpact, setPriorityImpact] = useState("5");
-  const [priorityEffort, setPriorityEffort] = useState("5");
-  const [priorityCategory, setPriorityCategory] = useState("Product");
-  const [priorityRank, setPriorityRank] = useState("1");
+  // ============================================================================
+  // Priority Item Form State
+  // Controls for the priority item submission form
+  // ============================================================================
+  const [priorityTitle, setPriorityTitle] = useState(""); // Item title
+  const [priorityDescription, setPriorityDescription] = useState(""); // Detailed description
+  const [priorityImpact, setPriorityImpact] = useState("5"); // Impact score 1-10
+  const [priorityEffort, setPriorityEffort] = useState("5"); // Effort score 1-10
+  const [priorityCategory, setPriorityCategory] = useState("Product"); // Category classification
+  const [priorityRank, setPriorityRank] = useState("1"); // Priority ranking
 
-  const [channelName, setChannelName] = useState("");
-  const [channelStatus, setChannelStatus] = useState("active");
-  const [channelMessageCount, setChannelMessageCount] = useState("0");
+  // ============================================================================
+  // Channel Form State
+  // Controls for the communication channel submission form
+  // ============================================================================
+  const [channelName, setChannelName] = useState(""); // Channel name
+  const [channelStatus, setChannelStatus] = useState("active"); // active/inactive
+  const [channelMessageCount, setChannelMessageCount] = useState("0"); // Formatted count (e.g., "2.5K")
 
+  // ============================================================================
+  // Feedback Mutation
+  // Handles feedback submission with cache invalidation
+  // ============================================================================
   const addFeedbackMutation = useMutation({
     mutationFn: async (data: any) => {
+      // POST request to create feedback
       return await apiRequest("POST", "/api/feedback", data);
     },
     onSuccess: () => {
+      // Invalidate relevant queries to trigger refetch
       queryClient.invalidateQueries({ queryKey: ["/api/feedback"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard-stats"] });
+      
+      // Show success notification
       toast({
         title: "Success",
         description: "Feedback added successfully",
       });
+      
+      // Clear form
       setFeedbackText("");
     },
     onError: () => {
+      // Show error notification
       toast({
         title: "Error",
         description: "Failed to add feedback",
@@ -56,20 +93,31 @@ export default function Manage() {
     },
   });
 
+  // ============================================================================
+  // Priority Item Mutation
+  // Handles priority item submission with cache invalidation
+  // ============================================================================
   const addPriorityMutation = useMutation({
     mutationFn: async (data: any) => {
+      // POST request to create priority item
       return await apiRequest("POST", "/api/priority-items", data);
     },
     onSuccess: () => {
+      // Invalidate priority items query to trigger refetch
       queryClient.invalidateQueries({ queryKey: ["/api/priority-items"] });
+      
+      // Show success notification
       toast({
         title: "Success",
         description: "Priority item added successfully",
       });
+      
+      // Clear form fields
       setPriorityTitle("");
       setPriorityDescription("");
     },
     onError: () => {
+      // Show error notification
       toast({
         title: "Error",
         description: "Failed to add priority item",
@@ -78,20 +126,31 @@ export default function Manage() {
     },
   });
 
+  // ============================================================================
+  // Channel Mutation
+  // Handles channel submission with cache invalidation
+  // ============================================================================
   const addChannelMutation = useMutation({
     mutationFn: async (data: any) => {
+      // POST request to create channel
       return await apiRequest("POST", "/api/channels", data);
     },
     onSuccess: () => {
+      // Invalidate channels query to trigger refetch
       queryClient.invalidateQueries({ queryKey: ["/api/channels"] });
+      
+      // Show success notification
       toast({
         title: "Success",
         description: "Channel added successfully",
       });
+      
+      // Reset form fields
       setChannelName("");
       setChannelMessageCount("0");
     },
     onError: () => {
+      // Show error notification
       toast({
         title: "Error",
         description: "Failed to add channel",
@@ -100,8 +159,16 @@ export default function Manage() {
     },
   });
 
+  // ============================================================================
+  // Form Handlers
+  // ============================================================================
+  
+  /**
+   * Handle Feedback Form Submission
+   * Validates and submits new customer feedback
+   */
   const handleAddFeedback = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent default form submission
     addFeedbackMutation.mutate({
       text: feedbackText,
       sentiment: feedbackSentiment,
@@ -110,20 +177,28 @@ export default function Manage() {
     });
   };
 
+  /**
+   * Handle Priority Item Form Submission
+   * Validates and submits new priority item
+   */
   const handleAddPriority = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent default form submission
     addPriorityMutation.mutate({
       title: priorityTitle,
       description: priorityDescription,
-      impact: parseInt(priorityImpact),
-      effort: parseInt(priorityEffort),
+      impact: parseInt(priorityImpact), // Convert to number
+      effort: parseInt(priorityEffort), // Convert to number
       category: priorityCategory,
-      rank: parseInt(priorityRank),
+      rank: parseInt(priorityRank), // Convert to number
     });
   };
 
+  /**
+   * Handle Channel Form Submission
+   * Validates and submits new communication channel
+   */
   const handleAddChannel = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent default form submission
     addChannelMutation.mutate({
       name: channelName,
       status: channelStatus,
@@ -134,6 +209,7 @@ export default function Manage() {
   return (
     <div className="pt-20 px-4 md:px-6 lg:px-8 pb-8">
       <div className="max-w-7xl mx-auto">
+        {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl lg:text-4xl font-semibold mb-2">Data Management</h1>
           <p className="text-muted-foreground">
@@ -141,7 +217,13 @@ export default function Manage() {
           </p>
         </div>
 
+        {/* Three-column grid layout for forms */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          {/* ============================================================================
+              Feedback Form
+              Allows adding customer feedback from various channels
+              ============================================================================ */}
           <Card className="p-6">
             <div className="flex items-center gap-2 mb-6">
               <Plus className="w-5 h-5 text-primary" />
@@ -149,6 +231,7 @@ export default function Manage() {
             </div>
 
             <form onSubmit={handleAddFeedback} className="space-y-4">
+              {/* Feedback Text Input */}
               <div>
                 <Label htmlFor="feedback-text">Feedback Text</Label>
                 <Textarea
@@ -162,6 +245,7 @@ export default function Manage() {
                 />
               </div>
 
+              {/* Sentiment Selection */}
               <div>
                 <Label htmlFor="feedback-sentiment">Sentiment</Label>
                 <Select value={feedbackSentiment} onValueChange={setFeedbackSentiment}>
@@ -176,7 +260,9 @@ export default function Manage() {
                 </Select>
               </div>
 
+              {/* Source and Region Selection */}
               <div className="grid grid-cols-2 gap-4">
+                {/* Feedback Source */}
                 <div>
                   <Label htmlFor="feedback-source">Source</Label>
                   <Select value={feedbackSource} onValueChange={setFeedbackSource}>
@@ -193,6 +279,7 @@ export default function Manage() {
                   </Select>
                 </div>
 
+                {/* Geographic Region */}
                 <div>
                   <Label htmlFor="feedback-region">Region</Label>
                   <Select value={feedbackRegion} onValueChange={setFeedbackRegion}>
@@ -210,6 +297,7 @@ export default function Manage() {
                 </div>
               </div>
 
+              {/* Submit Button */}
               <Button
                 type="submit"
                 className="w-full"
@@ -221,6 +309,10 @@ export default function Manage() {
             </form>
           </Card>
 
+          {/* ============================================================================
+              Priority Item Form
+              Allows adding items to the impact vs effort matrix
+              ============================================================================ */}
           <Card className="p-6">
             <div className="flex items-center gap-2 mb-6">
               <Plus className="w-5 h-5 text-primary" />
@@ -228,6 +320,7 @@ export default function Manage() {
             </div>
 
             <form onSubmit={handleAddPriority} className="space-y-4">
+              {/* Priority Title */}
               <div>
                 <Label htmlFor="priority-title">Title</Label>
                 <Input
@@ -241,6 +334,7 @@ export default function Manage() {
                 />
               </div>
 
+              {/* Priority Description */}
               <div>
                 <Label htmlFor="priority-description">Description</Label>
                 <Textarea
@@ -254,7 +348,9 @@ export default function Manage() {
                 />
               </div>
 
+              {/* Impact and Effort Scores */}
               <div className="grid grid-cols-2 gap-4">
+                {/* Impact Score (1-10) */}
                 <div>
                   <Label htmlFor="priority-impact">Impact (1-10)</Label>
                   <Input
@@ -270,6 +366,7 @@ export default function Manage() {
                   />
                 </div>
 
+                {/* Effort Score (1-10) */}
                 <div>
                   <Label htmlFor="priority-effort">Effort (1-10)</Label>
                   <Input
@@ -286,7 +383,9 @@ export default function Manage() {
                 </div>
               </div>
 
+              {/* Category and Rank */}
               <div className="grid grid-cols-2 gap-4">
+                {/* Category Classification */}
                 <div>
                   <Label htmlFor="priority-category">Category</Label>
                   <Select value={priorityCategory} onValueChange={setPriorityCategory}>
@@ -303,6 +402,7 @@ export default function Manage() {
                   </Select>
                 </div>
 
+                {/* Priority Ranking */}
                 <div>
                   <Label htmlFor="priority-rank">Rank</Label>
                   <Input
@@ -318,6 +418,7 @@ export default function Manage() {
                 </div>
               </div>
 
+              {/* Submit Button */}
               <Button
                 type="submit"
                 className="w-full"
@@ -329,6 +430,13 @@ export default function Manage() {
             </form>
           </Card>
 
+          {/* ============================================================================
+              Channel Form
+              Allows adding new communication channels
+              TODO: Add Twitter API integration for automatic data
+              TODO: Add Instagram API integration for automatic data
+              TODO: Add Facebook API integration for automatic data
+              ============================================================================ */}
           <Card className="p-6">
             <div className="flex items-center gap-2 mb-6">
               <Plus className="w-5 h-5 text-primary" />
@@ -336,6 +444,7 @@ export default function Manage() {
             </div>
 
             <form onSubmit={handleAddChannel} className="space-y-4">
+              {/* Channel Name */}
               <div>
                 <Label htmlFor="channel-name">Channel Name</Label>
                 <Input
@@ -349,6 +458,7 @@ export default function Manage() {
                 />
               </div>
 
+              {/* Channel Status */}
               <div>
                 <Label htmlFor="channel-status">Status</Label>
                 <Select value={channelStatus} onValueChange={setChannelStatus}>
@@ -362,6 +472,7 @@ export default function Manage() {
                 </Select>
               </div>
 
+              {/* Message Count */}
               <div>
                 <Label htmlFor="channel-message-count">Message Count</Label>
                 <Input
@@ -376,6 +487,7 @@ export default function Manage() {
                 />
               </div>
 
+              {/* Submit Button */}
               <Button
                 type="submit"
                 className="w-full"
