@@ -1,3 +1,30 @@
+<!--
+PROJECT DOCUMENTATION: REPLIT.MD
+
+PURPOSE:
+This file serves as the central knowledge base for the Sentiment360 project.
+It documents the complete technical architecture, user preferences, and system
+design decisions to maintain context across development sessions.
+
+IMPORTANT:
+- This file is automatically read by AI agents when resuming work on the project
+- Keep it updated as the architecture evolves and new features are added
+- Message history resets between sessions - this file is the primary memory
+
+WHEN TO UPDATE:
+- After adding/removing major features or dependencies
+- When architectural decisions change (e.g., switching ORMs, adding auth)
+- When user expresses new preferences or workflow requirements
+- After significant refactoring or project structure changes
+
+SECTIONS:
+1. Overview: Project purpose and main features
+2. User Preferences: Communication style and workflow preferences
+3. System Architecture: Complete technical stack documentation
+4. External Dependencies: Third-party libraries and their purposes
+5. Recent Changes: Timestamped log of significant modifications
+-->
+
 # Sentiment360 - Customer Sentiment Analytics Platform
 
 ## Overview
@@ -121,3 +148,16 @@ These Replit plugins are conditionally loaded only in development mode when runn
 
 ### Session Management
 - **connect-pg-simple**: PostgreSQL session store (dependency present but session implementation not yet active)
+
+---
+
+## Recent Changes
+
+### October 26, 2025 - Code Documentation Enhancement
+- Added comprehensive section-level comments throughout entire codebase
+- **Frontend**: Updated all 17 client-side files (pages, components, utilities) with clear explanations
+- **Backend**: Enhanced server/db.ts and server/index.ts with detailed architecture documentation
+- **Library Files**: Added extensive comments to queryClient.ts (TanStack Query config) and utils.ts (className utility)
+- **Documentation**: Added header descriptions to design_guidelines.md and replit.md
+- **Comment Philosophy**: Focus on WHAT each section does, WHY it exists, and HOW it fits into the application
+- **Note**: server/vite.ts is protected and cannot be modified (critical Vite configuration)
