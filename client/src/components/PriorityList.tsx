@@ -1,14 +1,20 @@
 /**
- * Priority List Component
+ * PRIORITY LIST COMPONENT
  * 
- * Displays priority items in a ranked list format with:
- * - Rank number badge
+ * Displays all priority items in a ranked list with:
+ * - Rank number badge (1 = highest priority)
  * - Item title and description
- * - Category badge
- * - Impact and Effort scores
+ * - Category badge (UX, Performance, Feature, etc.)
+ * - Impact score (1-10, higher is better)
+ * - Effort score (1-10, higher means more work)
  * 
- * Items are sorted by rank (1 = highest priority)
- * Includes sort filter buttons (currently non-functional placeholders)
+ * FEATURES:
+ * - Items sorted by rank (ascending)
+ * - Sort filter buttons (by Impact/Effort) - currently non-functional placeholders
+ * - Hover elevation for better UX
+ * - Green arrow on impact score indicates positive customer value
+ * 
+ * USAGE: Prioritization page - helps teams decide what to build next
  */
 
 import { Card } from "@/components/ui/card";
@@ -18,15 +24,12 @@ import { useQuery } from "@tanstack/react-query";
 import type { PriorityItem } from "@shared/schema";
 
 export default function PriorityList() {
-  /**
-   * Fetch Priority Items Data
-   * Retrieves all priority items from the API
-   */
+  // Fetch all priority items from API
   const { data: priorityData, isLoading } = useQuery<PriorityItem[]>({
     queryKey: ["/api/priority-items"],
   });
 
-  // Sort items by rank (ascending: 1, 2, 3...)
+  // Sort items by rank (1, 2, 3...)
   const sortedItems = priorityData?.sort((a, b) => a.rank - b.rank) || [];
 
   return (
@@ -35,14 +38,11 @@ export default function PriorityList() {
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-semibold">Top Priority Areas</h3>
         
-        {/* Sort Filter Buttons (currently non-functional - placeholder for future feature) */}
+        {/* Sort Filter Buttons - currently non-functional placeholders */}
         <div className="flex gap-2">
-          {/* Sort by Impact - Active by default */}
           <button className="text-xs px-3 py-1 rounded-md bg-primary text-primary-foreground" data-testid="button-sort-impact">
             By Impact
           </button>
-          
-          {/* Sort by Effort */}
           <button className="text-xs px-3 py-1 rounded-md hover-elevate active-elevate-2" data-testid="button-sort-effort">
             By Effort
           </button>
@@ -50,7 +50,7 @@ export default function PriorityList() {
       </div>
       
       {isLoading ? (
-        // Loading State: Display skeleton cards
+        // Loading State: Skeleton cards
         <div className="space-y-3">
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="h-24 rounded-lg bg-muted/20 animate-pulse" />
@@ -70,15 +70,10 @@ export default function PriorityList() {
                 {index + 1}
               </div>
               
-              {/* Item Details Section */}
+              {/* Item Details */}
               <div className="flex-1 min-w-0">
-                {/* Title */}
                 <h4 className="font-medium mb-1">{item.title}</h4>
-                
-                {/* Description */}
                 <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
-                
-                {/* Category Badge */}
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="text-xs">
                     {item.category}
@@ -86,9 +81,9 @@ export default function PriorityList() {
                 </div>
               </div>
               
-              {/* Impact and Effort Scores Section */}
+              {/* Impact and Effort Scores */}
               <div className="flex gap-4 flex-shrink-0">
-                {/* Impact Score (with green arrow indicating positive impact) */}
+                {/* Impact Score (green arrow indicates positive value) */}
                 <div className="text-center">
                   <div className="text-xs text-muted-foreground mb-1">Impact</div>
                   <div className="flex items-center gap-1">
@@ -97,7 +92,7 @@ export default function PriorityList() {
                   </div>
                 </div>
                 
-                {/* Effort Score (1-10 scale) */}
+                {/* Effort Score */}
                 <div className="text-center">
                   <div className="text-xs text-muted-foreground mb-1">Effort</div>
                   <div className="font-bold">{item.effort}</div>

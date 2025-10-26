@@ -1,14 +1,19 @@
 /**
- * Feedback Highlights Component
+ * FEEDBACK HIGHLIGHTS COMPONENT
  * 
- * Displays the most recent customer feedback entries with:
+ * Displays the 3 most recent customer feedback entries with:
  * - Sentiment indicator (thumbs up/down icon)
  * - Feedback text
- * - Source channel (Twitter, Facebook, etc.)
+ * - Source channel (Twitter, Facebook, Email, etc.)
  * - Geographic region
  * - Relative timestamp (e.g., "3 hours ago")
  * 
- * Shows the top 3 most recent feedback items
+ * USAGE: Dashboard page - provides quick view of latest customer sentiment
+ * 
+ * VISUAL DESIGN:
+ * - Positive feedback: green thumbs up icon
+ * - Negative feedback: red thumbs down icon
+ * - Hover elevation effect for better UX
  */
 
 import { Card } from "@/components/ui/card";
@@ -19,11 +24,7 @@ import type { Feedback } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
 
 export default function FeedbackHighlights() {
-  /**
-   * Fetch Recent Feedback
-   * Retrieves the latest customer feedback from the API
-   * Results are automatically sorted by timestamp (newest first)
-   */
+  // Fetch recent feedback from API (sorted by timestamp, newest first)
   const { data: feedbackData, isLoading } = useQuery<Feedback[]>({
     queryKey: ["/api/feedback"],
   });
@@ -37,16 +38,15 @@ export default function FeedbackHighlights() {
       </div>
       
       {isLoading ? (
-        // Loading State: Display skeleton cards
+        // Loading State: Skeleton cards
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-24 rounded-lg bg-muted/20 animate-pulse" />
           ))}
         </div>
       ) : (
-        // Loaded State: Display actual feedback
+        // Loaded State: Show top 3 feedback items
         <div className="space-y-4">
-          {/* Show only the 3 most recent items */}
           {feedbackData?.slice(0, 3).map((feedback) => (
             <div
               key={feedback.id}
@@ -55,7 +55,7 @@ export default function FeedbackHighlights() {
             >
               {/* Feedback Content with Sentiment Icon */}
               <div className="flex items-start gap-3 mb-2">
-                {/* Sentiment Indicator Icon */}
+                {/* Sentiment Indicator */}
                 {feedback.sentiment === "positive" ? (
                   <ThumbsUp className="w-4 h-4 text-green-600 mt-1 flex-shrink-0" />
                 ) : (
@@ -68,18 +68,11 @@ export default function FeedbackHighlights() {
               
               {/* Metadata: Source, Region, Timestamp */}
               <div className="flex items-center gap-2 ml-7">
-                {/* Source Channel Badge */}
                 <Badge variant="secondary" className="text-xs">
                   {feedback.source}
                 </Badge>
-                
-                {/* Geographic Region */}
                 <span className="text-xs text-muted-foreground">{feedback.region}</span>
-                
-                {/* Separator */}
                 <span className="text-xs text-muted-foreground">•</span>
-                
-                {/* Relative Timestamp (e.g., "3 hours ago") */}
                 <span className="text-xs text-muted-foreground">
                   {formatDistanceToNow(new Date(feedback.timestamp), { addSuffix: true })}
                 </span>
