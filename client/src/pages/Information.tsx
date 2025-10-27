@@ -311,53 +311,129 @@ export default function Information() {
 
         {/* ============================================================================
             GETTING STARTED SECTION
-            Quick guide to begin using the platform
+            Comprehensive guide explaining how to use each tab effectively
             ============================================================================ */}
         <Card className="p-6 bg-gradient-to-br from-primary/5 to-transparent">
-          <h2 className="text-2xl font-semibold mb-4">Getting Started</h2>
+          <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+            <ArrowRight className="w-6 h-6 text-primary" />
+            Getting Started Guide
+          </h2>
           
-          <div className="space-y-3">
+          <div className="space-y-5">
+            
+            {/* STEP 1: Manage Tab */}
             <div className="flex items-start gap-3">
-              <ArrowRight className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-sm">
-                  <strong>Step 1:</strong> Navigate to the <strong>Data Management</strong> page to add 
-                  your customer feedback, priority items, and communication channels.
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground font-semibold text-sm flex-shrink-0">
+                1
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-semibold">Start with the Manage Tab</h3>
+                <p className="text-sm text-muted-foreground">
+                  Begin by adding your data. The Manage tab contains three forms:
+                </p>
+                <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                  <li>• <strong>Add New Feedback:</strong> Enter customer comments with sentiment (positive/negative/neutral), 
+                  select the source channel (Twitter, Facebook, etc.), and assign a region. This builds your sentiment database.</li>
+                  <li>• <strong>Add Priority Item:</strong> List improvement opportunities with impact scores (1-10, how much value), 
+                  effort scores (1-10, how much work), category, and priority rank. These appear in your prioritization analysis.</li>
+                  <li>• <strong>Add New Channel:</strong> Track communication channels (email, social media, support tickets) 
+                  with message volume. Use formats like "100", "2.5K", "1.5M" for message counts.</li>
+                </ul>
+                <p className="text-sm text-muted-foreground italic">
+                  <strong>Tip:</strong> Start by adding 10-15 feedback entries from different regions to see meaningful patterns.
                 </p>
               </div>
             </div>
             
+            {/* STEP 2: Dashboard Tab */}
             <div className="flex items-start gap-3">
-              <ArrowRight className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-sm">
-                  <strong>Step 2:</strong> View the <strong>Dashboard</strong> to see real-time sentiment 
-                  metrics, regional analysis, and feedback trends. Use the time period filters to analyze 
-                  different timeframes.
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground font-semibold text-sm flex-shrink-0">
+                2
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-semibold">Analyze Trends in the Dashboard</h3>
+                <p className="text-sm text-muted-foreground">
+                  The Dashboard tab provides real-time sentiment analysis across your organization:
+                </p>
+                <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                  <li>• <strong>Sentiment Trend Chart:</strong> Toggle between 30D (daily data), 90D (monthly), and All (all-time) 
+                  views to spot trends. Look for sudden drops or rises in sentiment scores.</li>
+                  <li>• <strong>Regional Sentiment Map:</strong> Compare sentiment across U.S. regions (Northeast, Southeast, 
+                  Midwest, Southwest, West). Identify underperforming regions that need attention.</li>
+                  <li>• <strong>Recent Feedback Highlights:</strong> Review the latest customer comments with sentiment badges. 
+                  Click through feedback to understand specific pain points.</li>
+                  <li>• <strong>Channel Performance:</strong> See which communication channels receive the most engagement 
+                  and how they compare in message volume.</li>
+                </ul>
+                <p className="text-sm text-muted-foreground italic">
+                  <strong>Tip:</strong> If a region shows low sentiment (below 7.0), drill into feedback from that area to identify issues.
                 </p>
               </div>
             </div>
             
+            {/* STEP 3: Prioritization Tab */}
             <div className="flex items-start gap-3">
-              <ArrowRight className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-sm">
-                  <strong>Step 3:</strong> Check the <strong>Prioritization Engine</strong> to identify 
-                  high-impact improvement opportunities. Review AI-generated insights for specific 
-                  recommendations.
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground font-semibold text-sm flex-shrink-0">
+                3
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-semibold">Prioritize Actions with the Prioritization Tab</h3>
+                <p className="text-sm text-muted-foreground">
+                  Use this tab to decide which improvements to tackle first:
+                </p>
+                <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                  <li>• <strong>Top Priority Areas List:</strong> View all priority items ranked by importance. Use the 
+                  "By Impact" button to sort by highest customer value, or "By Effort" to find quick wins (lowest effort first).</li>
+                  <li>• <strong>Impact vs Effort Matrix:</strong> Visual scatter plot showing all items. Focus on the top-left 
+                  quadrant (high impact, low effort) for maximum ROI. Avoid bottom-right items (low impact, high effort).</li>
+                  <li>• <strong>AI Insights:</strong> Review AI-generated recommendations based on patterns in your feedback. 
+                  Click "View Details" on any insight to see expected impact, timeline estimates, and key metrics to track.</li>
+                </ul>
+                <p className="text-sm text-muted-foreground italic">
+                  <strong>Tip:</strong> Start with items that score 8+ on impact and 3 or lower on effort - these are your "quick wins."
                 </p>
               </div>
             </div>
             
+            {/* STEP 4: Impact Tracker Tab */}
             <div className="flex items-start gap-3">
-              <ArrowRight className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-sm">
-                  <strong>Step 4:</strong> After implementing changes, use the <strong>Impact Tracker</strong> 
-                  to measure success with before/after comparisons and track key metrics over time.
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground font-semibold text-sm flex-shrink-0">
+                4
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-semibold">Measure Results with the Impact Tracker</h3>
+                <p className="text-sm text-muted-foreground">
+                  After implementing improvements, track their effectiveness:
+                </p>
+                <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                  <li>• <strong>Success Metrics:</strong> View before/after comparisons for key initiatives. Green arrows 
+                  indicate improvements, red arrows show areas needing more work. Metrics include customer satisfaction scores, 
+                  response times, and issue recurrence rates.</li>
+                  <li>• <strong>Weekly Active Users Chart:</strong> Monitor platform engagement over time to ensure adoption 
+                  of new features or processes.</li>
+                  <li>• <strong>Customer Satisfaction Trends:</strong> Track overall satisfaction changes month-over-month. 
+                  Connect changes to specific initiatives to prove ROI.</li>
+                </ul>
+                <p className="text-sm text-muted-foreground italic">
+                  <strong>Tip:</strong> Take screenshots of "before" metrics before implementing changes so you can demonstrate clear improvement.
                 </p>
               </div>
             </div>
+
+            {/* BEST PRACTICES */}
+            <div className="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/20">
+              <h3 className="font-semibold mb-2 flex items-center gap-2">
+                <Lightbulb className="w-4 h-4 text-primary" />
+                Best Practices
+              </h3>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Update feedback data regularly (weekly) to keep sentiment analysis current</li>
+                <li>• Review all four tabs in sequence: Manage → Dashboard → Prioritization → Impact Tracker</li>
+                <li>• Set specific targets (e.g., "increase sentiment from 7.2 to 8.0 in Q2") and track progress</li>
+                <li>• Share AI insights with your team to align on priorities and expected outcomes</li>
+              </ul>
+            </div>
+
           </div>
         </Card>
 
