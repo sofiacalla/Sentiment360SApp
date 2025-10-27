@@ -9,7 +9,7 @@
  * FEATURES:
  * - Smooth curved line with tension 0.4
  * - Interactive tooltips showing exact values
- * - Period selector buttons (30D, 90D, All) - currently non-functional placeholders
+ * - Period selector buttons (30D, 90D, All) - filters data by time range
  * 
  * CHART CONFIGURATION:
  * - Built with Chart.js
@@ -17,25 +17,54 @@
  */
 
 import { Card } from "@/components/ui/card";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Chart, registerables } from "chart.js";
 import { useQuery } from "@tanstack/react-query";
 import type { SentimentTrend } from "@shared/schema";
 
 Chart.register(...registerables);
 
+type TimePeriod = "30d" | "90d" | "all";
+
 export default function SentimentTrendChart() {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
+  
+  // Track selected time period (default: 30 days)
+  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("30d");
 
   // Fetch sentiment trends from API
   const { data: trendsData, isLoading } = useQuery<SentimentTrend[]>({
     queryKey: ["/api/sentiment-trends"],
   });
 
-  // CHART LIFECYCLE: Create/update chart when data changes
+  /**
+   * FILTER DATA BY TIME PERIOD
+   * Returns subset of trend data based on selected period:
+   * - 30d: Last 1 month of data
+   * - 90d: Last 3 months of data
+   * - all: All available data
+   */
+  const getFilteredData = () => {
+    if (!trendsData || trendsData.length === 0) return [];
+    
+    if (selectedPeriod === "all") {
+      return trendsData;
+    }
+    
+    // Calculate number of months to show
+    const monthsToShow = selectedPeriod === "30d" ? 1 : 3;
+    
+    // Return last N months of data
+    return trendsData.slice(-monthsToShow);
+  };
+
+  // Get filtered data based on selected period
+  const filteredData = getFilteredData();
+
+  // CHART LIFECYCLE: Create/update chart when data or period changes
   useEffect(() => {
-    if (!chartRef.current || !trendsData || trendsData.length === 0) return;
+    if (!chartRef.current || !filteredData || filteredData.length === 0) return;
 
     const ctx = chartRef.current.getContext("2d");
     if (!ctx) return;
@@ -46,8 +75,8 @@ export default function SentimentTrendChart() {
     }
 
     // Extract labels and data
-    const labels = trendsData.map((t) => t.month);
-    const data = trendsData.map((t) => parseFloat(t.score));
+    const labels = filteredData.map((t) => t.month);
+    const data = filteredData.map((t) => parseFloat(t.score));
 
     // Create new line chart
     chartInstance.current = new Chart(ctx, {
@@ -112,7 +141,7 @@ export default function SentimentTrendChart() {
         chartInstance.current.destroy();
       }
     };
-  }, [trendsData]);
+  }, [filteredData]);
 
   return (
     <Card className="p-6" data-testid="chart-sentiment-trend">
@@ -120,15 +149,39 @@ export default function SentimentTrendChart() {
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold">Overall Sentiment Trend</h3>
         
-        {/* Time Period Buttons - currently non-functional placeholders */}
+        {/* Time Period Buttons - filters chart data */}
         <div className="flex gap-2">
-          <button className="text-xs px-3 py-1 rounded-md bg-primary text-primary-foreground" data-testid="button-period-30d">
+          <button 
+            onClick={() => setSelectedPeriod("30d")}
+            className={`text-xs px-3 py-1 rounded-md ${
+              selectedPeriod === "30d" 
+                ? "bg-primary text-primary-foreground" 
+                : "hover-elevate active-elevate-2"
+            }`}
+            data-testid="button-period-30d"
+          >
             30D
           </button>
-          <button className="text-xs px-3 py-1 rounded-md hover-elevate active-elevate-2" data-testid="button-period-90d">
+          <button 
+            onClick={() => setSelectedPeriod("90d")}
+            className={`text-xs px-3 py-1 rounded-md ${
+              selectedPeriod === "90d" 
+                ? "bg-primary text-primary-foreground" 
+                : "hover-elevate active-elevate-2"
+            }`}
+            data-testid="button-period-90d"
+          >
             90D
           </button>
-          <button className="text-xs px-3 py-1 rounded-md hover-elevate active-elevate-2" data-testid="button-period-all">
+          <button 
+            onClick={() => setSelectedPeriod("all")}
+            className={`text-xs px-3 py-1 rounded-md ${
+              selectedPeriod === "all" 
+                ? "bg-primary text-primary-foreground" 
+                : "hover-elevate active-elevate-2"
+            }`}
+            data-testid="button-period-all"
+          >
             All
           </button>
         </div>

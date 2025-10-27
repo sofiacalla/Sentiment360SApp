@@ -5,19 +5,20 @@
  * - Side-by-side comparison (Before | After)
  * - Percentage improvement badge at bottom
  * - Optional unit display (hours, %, /10, etc.)
+ * - Smart arrow direction based on metric type
  * 
  * USAGE: Impact Tracker page showing 3 key metrics:
- * - Time to Resolution (hours)
- * - Customer Satisfaction (/10)
- * - Issue Recurrence (%)
+ * - Time to Resolution (hours) - lower is better → down arrow
+ * - Customer Satisfaction (/10) - higher is better → up arrow
+ * - Issue Recurrence (%) - lower is better → down arrow
  * 
- * STYLING:
- * - After value highlighted in green (success color)
- * - Green improvement badge with down arrow (reduction is good for time/issues)
+ * ARROW LOGIC:
+ * - Metrics where HIGHER is better (satisfaction, scores): up arrow
+ * - Metrics where LOWER is better (time, recurrence): down arrow
  */
 
 import { Card } from "@/components/ui/card";
-import { ArrowDown } from "lucide-react";
+import { ArrowDown, ArrowUp } from "lucide-react";
 
 interface ImpactComparisonProps {
   title: string;
@@ -36,6 +37,38 @@ export default function ImpactComparison({
   unit = "",
   testId,
 }: ImpactComparisonProps) {
+  /**
+   * Determine if higher values are better for this metric
+   * Returns true if improvement means value should INCREASE (like satisfaction)
+   * Returns false if improvement means value should DECREASE (like resolution time)
+   */
+  const isHigherBetter = () => {
+    const titleLower = title.toLowerCase();
+    
+    // Metrics where HIGHER is better
+    const higherBetterKeywords = [
+      "satisfaction", 
+      "score", 
+      "rating", 
+      "quality",
+      "retention",
+      "engagement",
+      "adoption",
+      "success"
+    ];
+    
+    // Check if any "higher is better" keyword is in the title
+    const isHigher = higherBetterKeywords.some(keyword => 
+      titleLower.includes(keyword)
+    );
+    
+    return isHigher;
+  };
+  
+  // Determine which arrow to show
+  const showUpArrow = isHigherBetter();
+  const ArrowIcon = showUpArrow ? ArrowUp : ArrowDown;
+  
   return (
     <Card className="p-6" data-testid={testId}>
       <h3 className="text-sm text-muted-foreground mb-6">{title}</h3>
@@ -59,9 +92,9 @@ export default function ImpactComparison({
         </div>
       </div>
       
-      {/* IMPROVEMENT BADGE: Shows percentage improvement with green styling */}
+      {/* IMPROVEMENT BADGE: Shows percentage improvement with directional arrow */}
       <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 border border-green-200">
-        <ArrowDown className="w-5 h-5 text-green-600" />
+        <ArrowIcon className="w-5 h-5 text-green-600" data-testid={`${testId}-arrow`} />
         <span className="text-sm font-medium text-green-700" data-testid={`${testId}-improvement`}>
           {improvement}% improvement
         </span>
