@@ -2,7 +2,7 @@
  * SENTIMENT TREND CHART COMPONENT
  * 
  * Line chart showing sentiment score evolution over time:
- * - X-axis: Months (Jan through Oct)
+ * - X-axis: Days (for 30D view) or Months (for 90D/All views)
  * - Y-axis: Sentiment score (0-10 scale)
  * - Filled area under the line for visual emphasis
  * 
@@ -10,6 +10,7 @@
  * - Smooth curved line with tension 0.4
  * - Interactive tooltips showing exact values
  * - Period selector buttons (30D, 90D, All) - filters data by time range
+ * - Smart data fetching: daily data for 30D, monthly data for 90D/All
  * 
  * CHART CONFIGURATION:
  * - Built with Chart.js
@@ -20,11 +21,22 @@ import { Card } from "@/components/ui/card";
 import { useEffect, useRef, useState } from "react";
 import { Chart, registerables } from "chart.js";
 import { useQuery } from "@tanstack/react-query";
-import type { SentimentTrend } from "@shared/schema";
 
 Chart.register(...registerables);
 
 type TimePeriod = "30d" | "90d" | "all";
+
+// Type for daily sentiment data
+interface DailySentimentData {
+  date: string; // "Day 1", "Day 2", etc.
+  score: string;
+}
+
+// Type for monthly sentiment data
+interface MonthlySentimentData {
+  month: string; // "Jan", "Feb", etc.
+  score: string;
+}
 
 export default function SentimentTrendChart() {
   const chartRef = useRef<HTMLCanvasElement>(null);
@@ -33,38 +45,65 @@ export default function SentimentTrendChart() {
   // Track selected time period (default: 30 days)
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("30d");
 
-  // Fetch sentiment trends from API
-  const { data: trendsData, isLoading } = useQuery<SentimentTrend[]>({
+  // Fetch daily sentiment data for 30D view using custom queryFn
+  const { data: dailyData, isLoading: isDailyLoading } = useQuery<DailySentimentData[]>({
+    queryKey: ["/api/sentiment-trends", "daily", 30],
+    queryFn: async () => {
+      const response = await fetch("/api/sentiment-trends?period=daily&days=30");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    },
+    enabled: selectedPeriod === "30d", // Only fetch when 30D is selected
+  });
+
+  // Fetch monthly sentiment data for 90D and All views
+  const { data: monthlyData, isLoading: isMonthlyLoading } = useQuery<MonthlySentimentData[]>({
     queryKey: ["/api/sentiment-trends"],
+    enabled: selectedPeriod !== "30d", // Only fetch when 90D or All is selected
   });
 
   /**
-   * FILTER DATA BY TIME PERIOD
-   * Returns subset of trend data based on selected period:
-   * - 30d: Last 1 month of data
-   * - 90d: Last 3 months of data
-   * - all: All available data
+   * FILTER MONTHLY DATA BY TIME PERIOD
+   * Returns subset of monthly data based on selected period
    */
-  const getFilteredData = () => {
-    if (!trendsData || trendsData.length === 0) return [];
+  const getFilteredMonthlyData = () => {
+    if (!monthlyData || monthlyData.length === 0) return [];
     
     if (selectedPeriod === "all") {
-      return trendsData;
+      return monthlyData;
     }
     
-    // Calculate number of months to show
-    const monthsToShow = selectedPeriod === "30d" ? 1 : 3;
-    
-    // Return last N months of data
-    return trendsData.slice(-monthsToShow);
+    // 90D: show last 3 months
+    return monthlyData.slice(-3);
   };
 
-  // Get filtered data based on selected period
-  const filteredData = getFilteredData();
+  /**
+   * GET CHART DATA
+   * Returns the appropriate data set based on selected period
+   */
+  const getChartData = () => {
+    if (selectedPeriod === "30d") {
+      return {
+        labels: dailyData?.map(d => d.date) || [],
+        data: dailyData?.map(d => parseFloat(d.score)) || [],
+      };
+    } else {
+      const filteredData = getFilteredMonthlyData();
+      return {
+        labels: filteredData.map(d => d.month),
+        data: filteredData.map(d => parseFloat(d.score)),
+      };
+    }
+  };
+
+  const chartData = getChartData();
+  const isLoading = selectedPeriod === "30d" ? isDailyLoading : isMonthlyLoading;
 
   // CHART LIFECYCLE: Create/update chart when data or period changes
   useEffect(() => {
-    if (!chartRef.current || !filteredData || filteredData.length === 0) return;
+    if (!chartRef.current || !chartData.labels.length || isLoading) return;
 
     const ctx = chartRef.current.getContext("2d");
     if (!ctx) return;
@@ -74,19 +113,15 @@ export default function SentimentTrendChart() {
       chartInstance.current.destroy();
     }
 
-    // Extract labels and data
-    const labels = filteredData.map((t) => t.month);
-    const data = filteredData.map((t) => parseFloat(t.score));
-
     // Create new line chart
     chartInstance.current = new Chart(ctx, {
       type: "line",
       data: {
-        labels,
+        labels: chartData.labels,
         datasets: [
           {
             label: "Sentiment Score",
-            data,
+            data: chartData.data,
             borderColor: "hsl(221, 83%, 53%)",
             backgroundColor: "hsla(221, 83%, 53%, 0.1)",
             fill: true,
@@ -129,6 +164,10 @@ export default function SentimentTrendChart() {
             },
             ticks: {
               color: "hsl(221, 6%, 40%)",
+              // For 30D view with many days, show fewer labels
+              maxRotation: 0,
+              autoSkip: true,
+              maxTicksLimit: selectedPeriod === "30d" ? 10 : 12,
             },
           },
         },
@@ -141,7 +180,7 @@ export default function SentimentTrendChart() {
         chartInstance.current.destroy();
       }
     };
-  }, [filteredData]);
+  }, [chartData, isLoading, selectedPeriod]);
 
   return (
     <Card className="p-6" data-testid="chart-sentiment-trend">

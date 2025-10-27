@@ -74,12 +74,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   /**
    * GET /api/sentiment-trends
    * Fetches historical sentiment trend data
+   * Query params:
+   *   - period: "daily" for daily data, omit for monthly data
+   *   - days: Number of days for daily data (default: 30)
    * Used by: Dashboard page for sentiment trend chart
    */
-  app.get("/api/sentiment-trends", async (_req, res) => {
+  app.get("/api/sentiment-trends", async (req, res) => {
     try {
-      const data = await storage.getSentimentTrends();
-      res.json(data);
+      // Check if daily data is requested
+      if (req.query.period === "daily") {
+        const days = req.query.days ? parseInt(req.query.days as string) : 30;
+        const data = await storage.getDailySentimentTrends(days);
+        res.json(data);
+      } else {
+        // Return monthly data for 90D and All views
+        const data = await storage.getSentimentTrends();
+        res.json(data);
+      }
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch sentiment trends" });
     }
