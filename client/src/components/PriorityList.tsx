@@ -9,41 +9,106 @@
  * - Effort score (1-10, higher means more work)
  * 
  * FEATURES:
- * - Items sorted by rank (ascending)
- * - Sort filter buttons (by Impact/Effort) - currently non-functional placeholders
+ * - Items sorted by rank (ascending) by default
+ * - Sort filter buttons to sort by Impact (high to low) or Effort (low to high)
+ * - Active button shows which sort is currently applied
  * - Hover elevation for better UX
  * - Green arrow on impact score indicates positive customer value
+ * 
+ * SORTING MODES:
+ * - "rank" (default): Sort by priority rank (1, 2, 3...)
+ * - "impact": Sort by impact score descending (10, 9, 8... - highest impact first)
+ * - "effort": Sort by effort score ascending (1, 2, 3... - lowest effort first)
  * 
  * USAGE: Prioritization page - helps teams decide what to build next
  */
 
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { PriorityItem } from "@shared/schema";
 
+// Define the possible sort modes
+type SortMode = "rank" | "impact" | "effort";
+
 export default function PriorityList() {
+  // Track current sort mode - defaults to "rank"
+  const [sortMode, setSortMode] = useState<SortMode>("rank");
+
   // Fetch all priority items from API
   const { data: priorityData, isLoading } = useQuery<PriorityItem[]>({
     queryKey: ["/api/priority-items"],
   });
 
-  // Sort items by rank (1, 2, 3...)
-  const sortedItems = priorityData?.sort((a, b) => a.rank - b.rank) || [];
+  /**
+   * SORT ITEMS BASED ON CURRENT MODE
+   * 
+   * This function applies the appropriate sorting logic based on the selected mode:
+   * - rank: Sort by priority rank (1, 2, 3...) - default order
+   * - impact: Sort by impact score descending (10, 9, 8...) - show high impact first
+   * - effort: Sort by effort score ascending (1, 2, 3...) - show low effort first
+   * 
+   * @returns Sorted array of priority items
+   */
+  const sortedItems = (() => {
+    if (!priorityData) return [];
+    
+    const items = [...priorityData]; // Create a copy to avoid mutating original data
+    
+    switch (sortMode) {
+      case "impact":
+        // Sort by impact descending (highest impact first)
+        return items.sort((a, b) => b.impact - a.impact);
+      
+      case "effort":
+        // Sort by effort ascending (lowest effort first - easiest wins)
+        return items.sort((a, b) => a.effort - b.effort);
+      
+      case "rank":
+      default:
+        // Sort by rank ascending (1, 2, 3...)
+        return items.sort((a, b) => a.rank - b.rank);
+    }
+  })();
 
   return (
     <Card className="p-6" data-testid="card-priority-list">
       {/* Header with Sort Buttons */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 gap-2 flex-wrap">
         <h3 className="text-lg font-semibold">Top Priority Areas</h3>
         
-        {/* Sort Filter Buttons - currently non-functional placeholders */}
+        {/* 
+          SORT FILTER BUTTONS
+          
+          These buttons change how the priority items are sorted.
+          The active button is highlighted with primary background color.
+          
+          - By Impact: Shows highest impact items first (10, 9, 8...)
+          - By Effort: Shows lowest effort items first (1, 2, 3...) - quick wins
+        */}
         <div className="flex gap-2">
-          <button className="text-xs px-3 py-1 rounded-md bg-primary text-primary-foreground" data-testid="button-sort-impact">
+          <button 
+            onClick={() => setSortMode("impact")}
+            className={`text-xs px-3 py-1 rounded-md ${
+              sortMode === "impact" 
+                ? "bg-primary text-primary-foreground" 
+                : "hover-elevate active-elevate-2"
+            }`}
+            data-testid="button-sort-impact"
+          >
             By Impact
           </button>
-          <button className="text-xs px-3 py-1 rounded-md hover-elevate active-elevate-2" data-testid="button-sort-effort">
+          <button 
+            onClick={() => setSortMode("effort")}
+            className={`text-xs px-3 py-1 rounded-md ${
+              sortMode === "effort" 
+                ? "bg-primary text-primary-foreground" 
+                : "hover-elevate active-elevate-2"
+            }`}
+            data-testid="button-sort-effort"
+          >
             By Effort
           </button>
         </div>
