@@ -153,6 +153,20 @@ These Replit plugins are conditionally loaded only in development mode when runn
 
 ## Recent Changes
 
+### October 27, 2025 - Daily Sentiment Data for 30D Chart View
+- **Backend API**: Added query parameter support to `/api/sentiment-trends` endpoint
+  - New query params: `?period=daily&days=30` returns daily data
+  - Without params: returns monthly data (for 90D and All views)
+- **Storage Layer**: Implemented `getDailySentimentTrends()` method generating 30 days of realistic data
+  - Daily data format: `{ date: "Day 1", score: "7.7" }`
+  - Sentiment scores range from 6.0-9.0 with realistic variations
+- **Frontend Chart**: Updated `SentimentTrendChart.tsx` with dual data fetching
+  - Custom `queryFn` for daily data query (30D view)
+  - Shared fetcher for monthly data (90D/All views)
+  - Chart automatically switches between daily/monthly labels based on selected period
+  - X-axis configuration: `maxTicksLimit: 10` for 30D view to prevent label crowding
+- **Testing**: End-to-end tests confirm correct API calls and label rendering for all period views
+
 ### October 26, 2025 - Code Documentation Enhancement
 - Added comprehensive section-level comments throughout entire codebase
 - **Frontend**: Updated all 17 client-side files (pages, components, utilities) with clear explanations
