@@ -3,13 +3,13 @@
  * 
  * Fixed top navigation with:
  * - Logo and brand name on the left
- * - Navigation tabs on the right (Dashboard, Prioritization, Impact Tracker, Manage)
+ * - Navigation tabs on the right (Dashboard, Prioritization, Impact Tracker, Manage, Information)
  * - Active tab highlighting based on current route
  * - Responsive design (hides labels on mobile, shows on tablet+)
  */
 
 import { Link, useLocation } from "wouter";
-import { BarChart3, Target, TrendingUp, Settings } from "lucide-react";
+import { BarChart3, Target, TrendingUp, Settings, Info } from "lucide-react";
 
 export default function Navigation() {
   const [location] = useLocation();
@@ -20,6 +20,7 @@ export default function Navigation() {
     { path: "/prioritization", label: "Prioritization", icon: Target },
     { path: "/impact", label: "Impact Tracker", icon: TrendingUp },
     { path: "/manage", label: "Manage", icon: Settings },
+    { path: "/information", label: "Information", icon: Info },
   ];
 
   return (

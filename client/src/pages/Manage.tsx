@@ -26,7 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Plus } from "lucide-react";
+import { Plus, AlertCircle } from "lucide-react";
 
 export default function Manage() {
   // Toast notification hook for user feedback
@@ -59,6 +59,101 @@ export default function Manage() {
   const [channelName, setChannelName] = useState(""); // Channel name
   const [channelStatus, setChannelStatus] = useState("active"); // active/inactive
   const [channelMessageCount, setChannelMessageCount] = useState("0"); // Formatted count (e.g., "2.5K")
+  
+  // ============================================================================
+  // Message Count Validation State
+  // Tracks whether the message count input is valid and stores error messages
+  // ============================================================================
+  const [messageCountError, setMessageCountError] = useState<string | null>(null);
+
+  /**
+   * VALIDATE MESSAGE COUNT FORMAT
+   * 
+   * This function validates the message count input to ensure it follows
+   * acceptable formats. It prevents invalid data from being submitted.
+   * 
+   * VALID FORMATS:
+   * - Plain numbers: "100", "1500", "42"
+   * - Numbers with K suffix: "2.5K", "10K", "1.2K"  (case insensitive)
+   * - Numbers with M suffix: "1M", "2.5M", "10M"    (case insensitive)
+   * - Numbers with B suffix: "1B", "3.5B"           (case insensitive)
+   * 
+   * INVALID FORMATS:
+   * - Text/words: "hello", "test"
+   * - Special characters: "@", "#", "$"
+   * - Multiple decimal points: "2.5.3K"
+   * - Invalid suffix: "2X", "5Z", "2KK", "10kmb"
+   * - Mixed characters: "1a2", "2.5abc"
+   * 
+   * EDGE CASE HANDLING:
+   * - Trims whitespace before validation
+   * - Case-insensitive suffix matching (K, k, M, m, B, b all work)
+   * - Rejects any trailing characters after valid suffix
+   * 
+   * @param value - The message count string to validate
+   * @returns boolean - true if valid, false if invalid
+   */
+  const validateMessageCount = (value: string): boolean => {
+    // Trim whitespace to handle edge cases like " 100 " or "2.5K "
+    const trimmedValue = value.trim();
+    
+    // Allow empty string (required attribute will handle it)
+    if (trimmedValue === "") {
+      setMessageCountError(null);
+      return true;
+    }
+
+    // EDGE CASE: Reject negative numbers (e.g., "-100", "-2.5K")
+    if (trimmedValue.startsWith("-") || trimmedValue.startsWith("+")) {
+      setMessageCountError(
+        "Invalid format. Use numbers (e.g., 100), K suffix (e.g., 2.5K), M suffix (e.g., 1.5M), or B suffix (e.g., 3B)."
+      );
+      return false;
+    }
+
+    // EDGE CASE: Reject scientific notation (e.g., "1E3", "1e3", "2.5E10")
+    if (trimmedValue.toLowerCase().includes("e")) {
+      setMessageCountError(
+        "Invalid format. Use numbers (e.g., 100), K suffix (e.g., 2.5K), M suffix (e.g., 1.5M), or B suffix (e.g., 3B)."
+      );
+      return false;
+    }
+
+    // STRICT Regular expression pattern for valid message count formats
+    // ^ = start of string (no characters before)
+    // [0-9]+ = one or more digits (required)
+    // (\.[0-9]+)? = optional decimal point followed by one or more digits
+    // [KMB]? = optional SINGLE letter K, M, or B (case insensitive with 'i' flag)
+    // $ = end of string (no characters after - this prevents "1KK" or "2.5abc")
+    const validPattern = /^[0-9]+(\.[0-9]+)?[KMB]?$/i;
+
+    // Test the trimmed value against the pattern
+    if (!validPattern.test(trimmedValue)) {
+      // Invalid format detected - set error message with examples
+      setMessageCountError(
+        "Invalid format. Use numbers (e.g., 100), K suffix (e.g., 2.5K), M suffix (e.g., 1.5M), or B suffix (e.g., 3B)."
+      );
+      return false;
+    }
+
+    // Valid format - clear any error messages
+    setMessageCountError(null);
+    return true;
+  };
+
+  /**
+   * HANDLE MESSAGE COUNT CHANGE
+   * 
+   * This function is called every time the user types in the message count field.
+   * It updates the state and validates the input in real-time to provide
+   * immediate feedback to the user.
+   * 
+   * @param value - The new value from the input field
+   */
+  const handleMessageCountChange = (value: string) => {
+    setChannelMessageCount(value);
+    validateMessageCount(value);
+  };
 
   // ============================================================================
   // Feedback Mutation
@@ -148,6 +243,7 @@ export default function Manage() {
       // Reset form fields
       setChannelName("");
       setChannelMessageCount("0");
+      setMessageCountError(null); // Clear any error state
     },
     onError: () => {
       // Show error notification
@@ -195,10 +291,27 @@ export default function Manage() {
 
   /**
    * Handle Channel Form Submission
-   * Validates and submits new communication channel
+   * 
+   * This handler validates the message count before submitting.
+   * If the message count is invalid, the form submission is blocked
+   * and the user sees an error message.
    */
   const handleAddChannel = (e: React.FormEvent) => {
     e.preventDefault(); // Prevent default form submission
+    
+    // EDGE CASE HANDLING: Validate message count format before submission
+    // This prevents invalid data from reaching the backend
+    if (!validateMessageCount(channelMessageCount)) {
+      // Show error toast to alert the user
+      toast({
+        title: "Validation Error",
+        description: "Please fix the message count format before submitting.",
+        variant: "destructive",
+      });
+      return; // Stop form submission
+    }
+
+    // All validation passed - submit the data
     addChannelMutation.mutate({
       name: channelName,
       status: channelStatus,
@@ -432,10 +545,7 @@ export default function Manage() {
 
           {/* ============================================================================
               Channel Form
-              Allows adding new communication channels
-              TODO: Add Twitter API integration for automatic data
-              TODO: Add Instagram API integration for automatic data
-              TODO: Add Facebook API integration for automatic data
+              Allows adding new communication channels with validation
               ============================================================================ */}
           <Card className="p-6">
             <div className="flex items-center gap-2 mb-6">
@@ -472,7 +582,7 @@ export default function Manage() {
                 </Select>
               </div>
 
-              {/* Message Count */}
+              {/* Message Count with Validation */}
               <div>
                 <Label htmlFor="channel-message-count">Message Count</Label>
                 <Input
@@ -480,11 +590,30 @@ export default function Manage() {
                   data-testid="input-channel-message-count"
                   type="text"
                   value={channelMessageCount}
-                  onChange={(e) => setChannelMessageCount(e.target.value)}
+                  onChange={(e) => handleMessageCountChange(e.target.value)}
                   placeholder="e.g., 2.5K, 15K, 100..."
                   required
-                  className="mt-2"
+                  // ERROR HANDLING: Add red border when validation fails
+                  className={`mt-2 ${messageCountError ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                 />
+                
+                {/* ERROR MESSAGE: Display validation error when present */}
+                {messageCountError && (
+                  <div 
+                    className="flex items-start gap-2 mt-2 text-sm text-destructive"
+                    data-testid="error-message-count"
+                  >
+                    <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <span>{messageCountError}</span>
+                  </div>
+                )}
+                
+                {/* HELPER TEXT: Always visible to guide users */}
+                {!messageCountError && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Enter a number (e.g., 100) or use K/M/B suffixes (e.g., 2.5K, 1.5M, 3B)
+                  </p>
+                )}
               </div>
 
               {/* Submit Button */}
@@ -492,7 +621,7 @@ export default function Manage() {
                 type="submit"
                 className="w-full"
                 data-testid="button-add-channel"
-                disabled={addChannelMutation.isPending}
+                disabled={addChannelMutation.isPending || !!messageCountError}
               >
                 {addChannelMutation.isPending ? "Adding..." : "Add Channel"}
               </Button>

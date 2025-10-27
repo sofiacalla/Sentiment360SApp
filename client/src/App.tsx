@@ -19,6 +19,7 @@ import Dashboard from "@/pages/Dashboard";
 import Prioritization from "@/pages/Prioritization";
 import ImpactTracker from "@/pages/ImpactTracker";
 import Manage from "@/pages/Manage";
+import Information from "@/pages/Information";
 
 /**
  * ROUTER CONFIGURATION
@@ -31,6 +32,7 @@ function Router() {
       <Route path="/prioritization" component={Prioritization} />
       <Route path="/impact" component={ImpactTracker} />
       <Route path="/manage" component={Manage} />
+      <Route path="/information" component={Information} />
     </Switch>
   );
 }
