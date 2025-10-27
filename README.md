@@ -1,101 +1,72 @@
-# Sentiment360SApp
+## 1. 🧩 Problem / Opportunity
 
-# Sentiment360 Prototype
+Product managers are tasked with understanding customer sentiment to guide product decisions—but the process is fragmented and inefficient. Feedback arrives through multiple channels—email, social media, surveys—and compiling it is slow, manual, and siloed. This fragmentation prevents a unified view of what customers are truly experiencing.
 
-A demo prototype that demonstrates end-to-end sentiment and feedback analysis for customer experience. Many parts are hacked together and use synthetic or AI‑generated data; this README documents the prototype behavior and the production requirements the software engineering team must implement.
+Without integrated insights, product teams risk acting on incomplete or conflicting signals, leading to misaligned features, missed opportunities, and products that fail to resonate. A holistic, real-time understanding of customer sentiment is essential for designing solutions that reflect actual user needs.
 
----
+**Who experiences this problem?**  
+Product managers, CX leads, and cross-functional teams responsible for translating customer feedback into product strategy.
 
-### Overview
-
-- **Purpose**: Showcase ingestion, basic processing, AI‑generated insights, and dashboard visuals for customer feedback use cases.  
-- **Scope**: Prototype uses simulated or AI‑generated snippets for demonstration and does not represent production quality, completeness, or correctness.
-
----
-
-### Disclosure
-
-This prototype is for illustration only. Insights, dashboards, and functionality must be implemented by the engineering team. The prototype was AI generated and may contain inconsistencies or errors that should be corrected, for example when a metric shows an improvement percentage but the visual indicator points downward.
+**Why it matters:**  
+A 360° view of sentiment enables faster, more confident decision-making, improves alignment across teams, and ensures that product improvements are grounded in real user experiences.
 
 ---
 
-### Data sources and pipeline
+## 2. 🎯 Goals and Success Metrics
 
-- For prototype purposes the app ingests simulated or AI‑generated snippets from a single source.  
-- Production requirement: connect to channel APIs to ingest raw posts and messages, store raw data in a centralized data lake, and process it with a scalable data engine. Include schema validation, enrichment, deduplication, and transformation to produce the analytical datasets the frontend consumes.
+**Primary Goal:**  
+Help product managers synthesize customer feedback across platforms to surface common themes and generate actionable insights.
 
----
+**Secondary Goals:**  
+- Deliver tailored recommendations based on clustered feedback.  
+- Automatically prioritize solutions by volume and severity of root issues.
 
-### AI and analytics
-
-- For prototype purposes AI outputs are synthetic and illustrative.  
-- Production requirement: run AI on processed datasets to generate tailored, actionable insights that adapt wording, metric selection, and thresholds to each user’s industry and account context. Ensure insights include clear, actionable recommendations.
-
----
-
-### Indicators and metrics
-
-- For prototype purposes indicators are mocked for demonstration.  
-- Production requirement: compute and persist key indicators from canonical processed data. Document and make configurable metric definitions, normalization ranges, and aggregation windows so teams can validate and audit results.
+**Success Metrics:**  
+- ⏱️ **Time-to-resolution**: Reduction in time required to compile feedback and generate quarterly reports.  
+- 📈 **Channel coverage**: Increase in the number of integrated feedback sources.  
+- 💬 **Customer usage**: Growth in daily active users, satisfaction scores, and retention after feedback-driven releases.
 
 ---
 
-### Configuration and data management
+## 3. 🧪 Prototype Overview
 
-- For prototype purposes configuration is simulated.  
-- Production requirement: include a Configuration or Data Management tab to add and authorize data sources, upload CSV or batch files for ingestion/backfill, and define or map custom metrics and derived fields. Configuration changes should trigger re‑ingestion or re‑processing as needed.
+**GitHub Repository:** [Sentiment360SApp](https://github.com/sofiacalla/Sentiment360SApp.git)  
+**Coded Prototype:** [Replit Sandbox](https://replit.com/join/ngdwjsmrgm-scallamandt)  
+**Demo Video:** _[Add link here]_
 
----
+Sentiment360 is a prototype app that aggregates customer feedback from Instagram, Facebook, X (formerly Twitter), email, and surveys to deliver a unified view of sentiment. It provides real-time insights, AI-generated recommendations, and dashboards to track impact over time.
 
-### Authentication and access control
+### Key Tabs & Features
 
-- For prototype purposes authentication and authorization are not implemented.  
-- Production requirement: require user authentication and implement role based access control to enforce view, edit, and admin permissions at both API and UI layers.
+- **Customer Sentiment Dashboard**  
+  Displays average sentiment, feedback volume, response rate, and active users. Includes regional sentiment analysis and time-filtered trend graphs.
 
----
+- **Prioritization Engine**  
+  Visualizes high-impact, low-effort recommendations using an impact vs. effort matrix. AI-generated insights guide product decisions.
 
-### Interactive visuals and data model
+- **Impact Tracker**  
+  Measures success of CX initiatives with before/after comparisons. Tracks satisfaction, retention, resolution time, and feedback volume.
 
-- For prototype purposes visuals are static or loosely connected.  
-- Production requirement: ensure visuals are linked and interactive so selections filter and refresh all panels. Backend datasets must maintain referential relationships and dimensional keys so scoped queries return consistent results.
-
----
-
-### Core platform services
-
-- For prototype purposes infrastructure, security, and operational controls were out of scope.  
-- Production requirement: include core platform components such as scalable, highly available architecture; strong security and compliance controls; resilience and disaster recovery; observability and operations; data governance and privacy controls; infrastructure automation; hardened API and integration patterns; and cost governance and monitoring.
+- **Configuration Tab (Data Management)**  
+  Allows manual input of feedback and priority items. Supports ongoing refinement of insights and dashboard data.
 
 ---
 
-### Known issues and sanity checks
+## ⚠️ Known Shortcuts & Prototype Limitations
 
-- Metrics and visuals may be inconsistent or contradictory.  
-- Any AI wording or numbers that do not match the visual context must be corrected during engineering implementation.  
-- Ensure all sensitive keys and secrets are never stored in source control.
+This prototype is illustrative and not production-ready. Key areas to be addressed by engineering include:
 
----
-
-### Development notes
-
-- Keep analytics, model training, and inference pipelines separate from the api/frontend deployment to allow independent scaling and testing.  
-- Persist intermediate and canonical datasets in the data lake for reproducibility and auditability.  
-- Treat the current mock configuration UI as a placeholder; production configuration must include authentication, validation, and change triggers.
+- **Data Pipeline**: Replace simulated snippets with real-time ingestion from channel APIs. Implement schema validation, enrichment, and transformation.
+- **AI & Analytics**: Replace synthetic outputs with contextual, industry-specific insights. Ensure recommendations are actionable and auditable.
+- **Metrics & Indicators**: Compute from canonical datasets. Make definitions configurable and transparent.
+- **Configuration Management**: Enable secure data source authorization, CSV ingestion, and custom metric mapping.
+- **Authentication & Access Control**: Implement user login and RBAC at both API and UI layers.
+- **Interactive Visuals**: Link dashboard elements for dynamic filtering and consistent scoped queries.
+- **Core Platform Services**: Add scalable infrastructure, security, observability, automation, and cost governance.
 
 ---
 
-### How to move this project from Replit to GitHub
+## 📣 Disclosure
 
-- Create a new empty GitHub repository.  
-- Option A use Replit Git integration to connect the project to the new GitHub repo and push commits.  
-- Option B open Replit shell and run git init, git add ., git commit -m "Initial commit", git branch -M main, git remote add origin <repo-url>, git push -u origin main.  
-- Do not commit secrets or environment variables; move them to a secure secrets store in CI/CD.
-
----
-
-### Contact and next steps
-
-- Replace synthetic data with real channel integrations and production data pipelines.  
-- Implement authentication, RBAC, and operational controls before any external deployment.  
-- Validate AI outputs against business rules and human review before surfacing insights to users.
+This prototype is for demonstration purposes only. All insights, dashboards, and functionality must be implemented by the software engineering team. The prototype uses AI-generated data and may contain inconsistencies—for example, mismatches between metric values and visual indicators.
 
