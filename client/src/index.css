@@ -91,35 +91,21 @@
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
-  /* Automatically computed borders - intensity can be controlled by the user by the --opaque-button-border-intensity setting */
-
-  /* Fallback for older browsers */
-  --sidebar-primary-border: hsl(var(--sidebar-primary));
-  --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --sidebar-accent-border: hsl(var(--sidebar-accent));
-  --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --primary-border: hsl(var(--primary));
-  --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --secondary-border: hsl(var(--secondary));
-  --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --muted-border: hsl(var(--muted));
-  --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --accent-border: hsl(var(--accent));
-  --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --destructive-border: hsl(var(--destructive));
-  --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  /* 
+   * CROSS-BROWSER COMPATIBLE BORDERS
+   * These border colors are pre-calculated for maximum browser compatibility
+   * Instead of using unsupported hsl(from ...) syntax, we use static values
+   * that work across all browsers including older versions
+   */
+  
+  /* Border colors: Slightly darker than their base colors in light mode */
+  --sidebar-primary-border: 221 83% 45%;
+  --sidebar-accent-border: 221 12% 80%;
+  --primary-border: 221 83% 45%;
+  --secondary-border: 0 0% 78%;
+  --muted-border: 221 6% 82%;
+  --accent-border: 221 8% 80%;
+  --destructive-border: 0 84% 52%;
 }
 
 .dark {
@@ -203,15 +189,72 @@
   --shadow-xl: 0px 16px 32px 0px hsl(0 0% 0% / 0.45), 0px 8px 10px -1px hsl(0 0% 0% / 0.25);
   --shadow-2xl: 0px 24px 48px 0px hsl(0 0% 0% / 0.50);
 
+  /* 
+   * CROSS-BROWSER COMPATIBLE BORDERS (DARK MODE)
+   * Border colors: Slightly lighter than their base colors in dark mode
+   */
+  --sidebar-primary-border: 221 83% 62%;
+  --sidebar-accent-border: 221 10% 29%;
+  --primary-border: 221 83% 62%;
+  --secondary-border: 0 0% 29%;
+  --muted-border: 221 5% 26%;
+  --accent-border: 221 6% 27%;
+  --destructive-border: 0 84% 69%;
 }
 
 @layer base {
+  /*
+   * CROSS-BROWSER NORMALIZATION
+   * Ensures consistent rendering across all browsers (Chrome, Firefox, Safari, Edge)
+   */
   * {
     @apply border-border;
   }
 
+  /* Ensure consistent box-sizing across all browsers */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  /* Remove default margins for better cross-browser consistency */
+  body, h1, h2, h3, h4, h5, h6, p, ul, ol, li, figure, figcaption, blockquote, dl, dd {
+    margin: 0;
+  }
+
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    min-height: 100vh;
+    line-height: 1.5;
+    /* Improve text rendering across browsers */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Ensure images are responsive by default */
+  img, picture, video, canvas, svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  /* Improve form elements cross-browser consistency */
+  input, button, textarea, select {
+    font: inherit;
+  }
+
+  /* Better button rendering across browsers */
+  button {
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  /* Ensure proper text wrapping */
+  p, h1, h2, h3, h4, h5, h6 {
+    overflow-wrap: break-word;
   }
 }
 
@@ -237,6 +280,11 @@
  */
 @layer utilities {
 
+  /*
+   * BROWSER-SPECIFIC FIXES
+   * Vendor-prefixed properties for cross-browser consistency
+   */
+  
   /* Hide ugly search cancel button in Chrome until we can style it properly */
   input[type="search"]::-webkit-search-cancel-button {
     @apply hidden;
@@ -247,6 +295,27 @@
     content: attr(data-placeholder);
     color: hsl(var(--muted-foreground));
     pointer-events: none;
+  }
+
+  /*
+   * ASPECT-RATIO FALLBACK
+   * For browsers that don't support aspect-ratio (very old browsers)
+   * Tailwind's aspect-square class uses aspect-ratio: 1/1
+   * This provides a fallback using padding-based technique
+   */
+  @supports not (aspect-ratio: 1 / 1) {
+    .aspect-square {
+      position: relative;
+      padding-bottom: 100%;
+      height: 0;
+    }
+    .aspect-square > * {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
   }
 
   /* .no-default-hover-elevate/no-default-active-elevate is an escape hatch so consumers of
